@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Products</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom fonts for this template -->
+    <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
+    <link href="vendor/simple-line-icons/css/simple-line-icons.css" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic" rel="stylesheet"
+        type="text/css">
+
+    <!-- Custom styles for this template -->
+    <link href="css/landing-page.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-light bg-light static-top">
+        <div class="container">
+            <div class="navbar-brand">Web API Project</div>
+            <div class="row">
+                <div id="UserName"></div>
+                <a class="btn btn-primary" onclick="logout()" href="index.html">Logout</a>
+            </div>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="sign-up-content">
+            <form id="formPost" method="POST" action="Home.html" class="signup-form">
+
+                <div class="form-textbox">
+                    <label for="Name">Name</label>
+                    <input type="text" name="name" id="name" />
+                </div>
+
+                <div class="form-textbox">
+                    <label for="Price">Price</label>
+                    <input type="number" name="price" id="price" />
+                </div>
+                <div class="form-textbox">
+                    <label for="Description">Description</label>
+                    <input type="textarea" name="description" id="description" />
+                </div>
+
+            </form>
+            <div class="form-textbox">
+                <input type="button" name="submit" id="submit" class="submit" onclick="edit()" value="Edit" />
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Footer -->
+    <footer class="footer bg-light">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6 h-100 text-center text-lg-left my-auto">
+                    <ul class="list-inline mb-2">
+                        <li class="list-inline-item">
+                            <a href="#">About</a>
+                        </li>
+                        <li class="list-inline-item">&sdot;</li>
+                        <li class="list-inline-item">
+                            <a href="#">Contact</a>
+                        </li>
+                        <li class="list-inline-item">&sdot;</li>
+                        <li class="list-inline-item">
+                            <a href="#">Terms of Use</a>
+                        </li>
+                        <li class="list-inline-item">&sdot;</li>
+                        <li class="list-inline-item">
+                            <a href="#">Privacy Policy</a>
+                        </li>
+                    </ul>
+                    <p class="text-muted small mb-4 mb-lg-0">&copy; Products 2019. All Rights Reserved.</p>
+                </div>
+                <div class="col-lg-6 h-100 text-center text-lg-right my-auto">
+                    <ul class="list-inline mb-0">
+                        <li class="list-inline-item mr-3">
+                            <a href="#">
+                                <i class="fab fa-facebook fa-2x fa-fw"></i>
+                            </a>
+                        </li>
+                        <li class="list-inline-item mr-3">
+                            <a href="#">
+                                <i class="fab fa-twitter-square fa-2x fa-fw"></i>
+                            </a>
+                        </li>
+                        <li class="list-inline-item">
+                            <a href="#">
+                                <i class="fab fa-instagram fa-2x fa-fw"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap core JavaScript -->
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script>
+        var access_token = sessionStorage.getItem("access_token");
+        var Username = sessionStorage.getItem("Username");
+        if(access_token==""){
+            window.location.href="Login.html";
+        }
+        var id = parseInt(location.search.substr(1).split("=")[1]);
+        $(document).ready(function () {
+            $.ajax({
+                url: 'http://localhost:52006/api/Product/'+id,
+                type: 'GET',
+                dataType: 'json',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': access_token
+                },
+                success: function (response) {
+                    putProduct(response);
+                },
+                error: function (request, message, error) {
+                    handleException(request, message, error);
+                }
+            });
+        });
+        function putProduct(product){
+            console.log(product["Name"]);
+            $("#name").val(product["Name"]);
+            $("#price").val(product["Price"]);
+            $("#description").val(product["Description"])
+        }
+        var Product = {
+            Name: "",
+            Price: 0,
+            Description: ""
+        }
+
+        function edit() {
+            console.log("register");
+            product = new Object();
+            product.Name = $("#name").val();
+            product.Price = $("#price").val();
+            product.Description = $("#description").val();
+
+            editProduct(product);
+        }
+
+        function editProduct(product) {
+            console.log("editProduct");
+            $.ajax({
+                url: "http://localhost:52006/api/product/"+id,
+                type: 'PUT',
+                contentType: "json",
+                data: JSON.stringify(product),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': access_token
+                },
+                success: function (response) {
+                    $("#formPost").submit();
+                },
+                error: function (request, message, error) {
+                    handleException(request, message, error);
+                }
+            });
+        }
+        function handleException(request, message, error) {
+            var msg = "";
+
+            msg += "Code: " + request.status + "\n";
+            msg += "Text: " + request.statusText + "\n";
+            if (request.responseJSON != null) {
+                msg += "Message" + request.responseJSON.Message + "\n";
+            }
+
+            alert(msg);
+        }
+
+    </script>
+
+</body>
+
+</html>

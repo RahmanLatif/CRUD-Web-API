@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Products</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom fonts for this template -->
+    <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
+    <link href="vendor/simple-line-icons/css/simple-line-icons.css" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic" rel="stylesheet"
+        type="text/css">
+
+    <!-- Custom styles for this template -->
+    <link href="css/landing-page.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <style>
+
+    </style>
+
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-light bg-light static-top">
+        <div class="container">
+            <div class="navbar-brand">Web API Project</div>
+            <div class="row">
+                <a class="btn btn-primary" href="Register.html">Register</a>
+                <a class="btn btn-primary" href="Login.html">Sign In</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="sign-up-content">
+            <form id="formPost" method="POST" action="Home.html" class="signup-form">
+
+                <div class="form-textbox">
+                    <label for="username">Username</label>
+                    <input type="text" name="username" id="username" />
+                </div>
+
+                <div class="form-textbox">
+                    <label for="pass">Password</label>
+                    <input type="password" name="pass" id="pass" />
+                </div>
+                <div class="form-textbox">
+                    <label for="pass">Confirm Password</label>
+                    <input type="password" name="conpass" id="conpass" />
+                </div>
+
+            </form>
+            <div class="form-textbox">
+                <input type="button" name="submit" id="submit" class="submit" onclick="register()"
+                    value="Create account" />
+            </div>
+            <p class="loginhere">
+                Already have an account ?<a href="Login.html" class="loginhere-link"> Log in</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer bg-light">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6 h-100 text-center text-lg-left my-auto">
+                    <ul class="list-inline mb-2">
+                        <li class="list-inline-item">
+                            <a href="#">About</a>
+                        </li>
+                        <li class="list-inline-item">&sdot;</li>
+                        <li class="list-inline-item">
+                            <a href="#">Contact</a>
+                        </li>
+                        <li class="list-inline-item">&sdot;</li>
+                        <li class="list-inline-item">
+                            <a href="#">Terms of Use</a>
+                        </li>
+                        <li class="list-inline-item">&sdot;</li>
+                        <li class="list-inline-item">
+                            <a href="#">Privacy Policy</a>
+                        </li>
+                    </ul>
+                    <p class="text-muted small mb-4 mb-lg-0">&copy; Products 2019. All Rights Reserved.</p>
+                </div>
+                <div class="col-lg-6 h-100 text-center text-lg-right my-auto">
+                    <ul class="list-inline mb-0">
+                        <li class="list-inline-item mr-3">
+                            <a href="#">
+                                <i class="fab fa-facebook fa-2x fa-fw"></i>
+                            </a>
+                        </li>
+                        <li class="list-inline-item mr-3">
+                            <a href="#">
+                                <i class="fab fa-twitter-square fa-2x fa-fw"></i>
+                            </a>
+                        </li>
+                        <li class="list-inline-item">
+                            <a href="#">
+                                <i class="fab fa-instagram fa-2x fa-fw"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap core JavaScript -->
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script>
+        var User = {
+            Username: "",
+            Password: "",
+            ConfirmPassword: ""
+        }
+        var UserLogin = {
+            username: "",
+            password: "",
+            grant_type:""
+        }
+
+        function register() {
+            console.log("register");
+            user = new Object();
+            user.Username = $("#username").val();
+            user.Password = $("#pass").val();
+            user.ConfirmPassword = $("#conpass").val();
+
+            addUser(user);
+        }
+
+        function addUser(user) {
+            console.log("addUser");
+            $.ajax({
+                url: "http://localhost:52006/api/Account/",
+                type: 'POST',
+                contentType: "json",
+                data: JSON.stringify(user),
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                success: function (response) {
+                    userAddSuccess(user);
+                },
+                error: function (request, message, error) {
+                    handleException(request, message, error);
+                }
+            });
+        }
+        function userAddSuccess(user) {
+            userLogin=new Object();
+            userLogin.username = user.Username;
+            userLogin.password = user.Password;
+            userLogin.grant_type="password";
+            Login(userLogin);
+        }
+        function handleException(request, message, error) {
+            var msg = "";
+
+            msg += "Code: " + request.status + "\n";
+            msg += "Text: " + request.statusText + "\n";
+            if (request.responseJSON != null) {
+                msg += "Message" + request.responseJSON.Message + "\n";
+            }
+
+            alert(msg);
+        }
+        function Login(userLogin) {
+            console.log("Login");
+            $.ajax({
+                url: "http://localhost:52006/login",
+                type: 'POST',
+                contentType: "json",
+                data: {'username':''+userLogin.username,
+                'password':''+userLogin.password,
+                'grant_type':'password'},
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                success: function (response) {
+                    sessionStorage.setItem("access_token","bearer "+response["access_token"]);
+                    sessionStorage.setItem("Username",$("#username").val());
+                    console.log(sessionStorage.getItem("access_token"));
+                    $("#formPost").submit();
+                },
+                error: function (request, message, error) {
+                    handleException(request, message, error);
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>
